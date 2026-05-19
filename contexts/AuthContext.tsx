@@ -1,14 +1,19 @@
-import { createContext, useContext, useState } from 'react';
-import { Alert } from 'react-native';
+import { token_key, user_key } from '@/constants/keys';
+import api from '@/services/api';
+import { LoginResponse, User } from '@/types';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createContext, useContext, useEffect, useState } from 'react';
 
 interface AuthProviderProps {
   children: React.ReactNode;
 }
 
 interface AuthContextData {
+  user: User | null;
   signed: boolean;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
+  signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext({} as AuthContextData);
@@ -16,22 +21,60 @@ const AuthContext = createContext({} as AuthContextData);
 export function AuthProvider({ children }: AuthProviderProps) {
   const [signed, setSigned] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const loadData = async () => {
+      await loadStorageData();
+    };
+    loadData();
+  }, []);
+
+  const loadStorageData = async () => {
+    try {
+      const storedToken = await AsyncStorage.getItem(token_key);
+      const storedUser = await AsyncStorage.getItem(user_key);
+
+      if (storedToken && storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const signIn = async (email: string, password: string) => {
-    Alert.alert('Login', `Bem vindo, ${email}`);
-      const data = {
-        email,
-        password,
-      };
-      console.log(`Dados do login: `, data);
+    try {
+      const response = await api.post<LoginResponse>('/session', {
+        email: email,
+        password: password,
+      });
+      console.log(response.data);
+      const { token, ...userData } = response.data;
+
+      await AsyncStorage.setItem(token_key, token);
+      await AsyncStorage.setItem(user_key, JSON.stringify(userData));
+      setUser(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const signOut = async () => {
+    // await AsyncStorage.removeItem(token_key);
+    // await AsyncStorage.removeItem(user_key);
+    await AsyncStorage.multiRemove([token_key, user_key]);
+    setUser(null);
   };
 
   return (
     <AuthContext
       value={{
-        signed,
+        user,
+        signed: !!user,
         loading,
         signIn,
+        signOut,
       }}
     >
       {children}

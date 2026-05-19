@@ -12,12 +12,14 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
+import { useRouter } from 'expo-router'
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
+  const router = useRouter()
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
@@ -27,6 +29,9 @@ export default function Login() {
     try {
       setLoading(true);
       await signIn(email, password);
+      setEmail('')
+      setPassword('')
+      router.replace('/(authenticated)/dashboard')
     } catch (error) {
       console.log(error);
       Alert.alert('Erro', 'Erro ao fazer o login');
