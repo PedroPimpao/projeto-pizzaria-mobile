@@ -2,20 +2,38 @@ import Button from '@/components/Button';
 import Input from '@/components/Input';
 import Logo from '@/components/logo';
 import { colors, spacing } from '@/constants/theme';
+import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
   View,
 } from 'react-native';
-import { handleSignIn } from './utils/auth';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const { signIn } = useAuth();
+
+  const handleLogin = async () => {
+    if (!email.trim() || !password.trim()) {
+      Alert.alert('Atenção!', 'Preencha os dados corretamente');
+      return;
+    }
+    try {
+      setLoading(true);
+      await signIn(email, password);
+    } catch (error) {
+      console.log(error);
+      Alert.alert('Erro', 'Erro ao fazer o login');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleEmailChange = (email: string) => {
     setEmail(email);
@@ -25,9 +43,6 @@ export default function Login() {
     setPassword(password);
   };
 
-  const login = () => {
-    handleSignIn({ email, password });
-  };
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -54,7 +69,7 @@ export default function Login() {
             onChangeText={handlePasswordChange}
             value={password}
           />
-          <Button title="Entrar" onPress={login} loading={loading}/>
+          <Button title="Entrar" onPress={handleLogin} loading={loading} />
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
