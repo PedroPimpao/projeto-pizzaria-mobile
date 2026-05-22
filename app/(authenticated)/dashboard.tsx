@@ -1,9 +1,13 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button, StyleSheet, Text, View } from 'react-native';
 
 export default function Dashboard() {
+  const { signOut } = useAuth();
+
   return (
     <View style={styles.container}>
       <Text>Dashboard Teste</Text>
+      <Button title="Sair" onPress={signOut} />
     </View>
   );
 }
