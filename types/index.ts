@@ -33,6 +33,17 @@ export interface Product {
   category?: Category;
 }
 
+export interface Order {
+  id: string
+  table: number
+  name?: string | null
+  draft: boolean
+  status: boolean
+  createdAt: string
+  updatedAt: string
+  items?: Item[]
+}
+
 export interface Item {
   id: string;
   amount: string;
@@ -56,3 +67,4 @@ export interface AddItemRequest {
 export interface SendOrderRequest {
   order_id: string;
 }
+

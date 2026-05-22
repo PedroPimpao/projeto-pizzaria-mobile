@@ -3,8 +3,13 @@ import Input from '@/components/Input';
 import Logo from '@/components/logo';
 import { borderRadius, colors, fontSize, spacing } from '@/constants/theme';
 import { useAuth } from '@/contexts/AuthContext';
+import api from '@/services/api';
+import { Order } from '@/types';
+import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useState } from 'react';
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -18,6 +23,49 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 export default function Dashboard() {
   const { signOut } = useAuth();
   const insets = useSafeAreaInsets();
+  const router = useRouter()
+
+  const [tableNumber, setTableNumber] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleOpenTable = async () => {
+    if (!tableNumber) {
+      Alert.alert('Atenção', 'Digite um número de mesa válido');
+      setTableNumber('');
+      return;
+    }
+
+    const tableNum = parseInt(tableNumber);
+    if (isNaN(tableNum) || tableNum < 0) {
+      Alert.alert('Atenção', 'Digite um número de mesa válido');
+      setTableNumber('');
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const response = await api.post<Order>('/order', {
+        table: tableNum,
+      });
+      console.log(response.data)
+      Alert.alert(
+        'Mesa aberta',
+        `Mesa de número ${tableNumber} aberta com sucesso!`,
+      );
+      const { table, id } = response.data
+      router.push({
+        pathname: '/(authenticated)/order',
+        params: { table: table , order_id: id }
+      });
+    } catch (error) {
+      console.log(error);
+      Alert.alert('Erro', 'Falha ao abrir mesa, tente mais tarde');
+    } finally {
+      setTableNumber('');
+      setLoading(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -31,7 +79,7 @@ export default function Dashboard() {
           keyboardShouldPersistTaps="handled"
         >
           <View style={[styles.header, { paddingTop: insets.top + 24 }]}>
-            <TouchableOpacity style={styles.signOutButton}>
+            <TouchableOpacity style={styles.signOutButton} onPress={signOut}>
               <Text style={styles.signOutText}>Sair</Text>
             </TouchableOpacity>
           </View>
@@ -41,8 +89,14 @@ export default function Dashboard() {
 
           <View style={styles.fieldContainer}>
             <Text style={styles.title}>Novo pedido</Text>
-            <Input placeholder="Numero da mesa..." style={styles.input} />
-            <Button title="Abrir mesa" onPress={() => {}} />
+            <Input
+              placeholder="Numero da mesa..."
+              style={styles.input}
+              value={tableNumber}
+              onChangeText={setTableNumber}
+              keyboardType="decimal-pad"
+            />
+            <Button title="Abrir mesa" onPress={handleOpenTable} loading={loading}/>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -87,7 +141,7 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontSize: fontSize.xl,
     fontWeight: '400',
-    marginHorizontal: 'auto'
+    marginHorizontal: 'auto',
   },
   input: {},
   fieldContainer: {

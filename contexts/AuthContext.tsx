@@ -61,8 +61,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const signOut = async () => {
-    // await AsyncStorage.removeItem(token_key);
-    // await AsyncStorage.removeItem(user_key);
     await AsyncStorage.multiRemove([token_key, user_key]);
     setUser(null);
   };
