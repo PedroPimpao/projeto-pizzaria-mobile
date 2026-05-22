@@ -23,7 +23,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 export default function Dashboard() {
   const { signOut } = useAuth();
   const insets = useSafeAreaInsets();
-  const router = useRouter()
+  const router = useRouter();
 
   const [tableNumber, setTableNumber] = useState('');
   const [loading, setLoading] = useState(false);
@@ -48,15 +48,15 @@ export default function Dashboard() {
       const response = await api.post<Order>('/order', {
         table: tableNum,
       });
-      console.log(response.data)
+      console.log(response.data);
       Alert.alert(
         'Mesa aberta',
         `Mesa de número ${tableNumber} aberta com sucesso!`,
       );
-      const { table, id } = response.data
+      const { table, id } = response.data;
       router.push({
         pathname: '/(authenticated)/order',
-        params: { table: table , order_id: id }
+        params: { table: table.toString(), order_id: id },
       });
     } catch (error) {
       console.log(error);
@@ -96,7 +96,11 @@ export default function Dashboard() {
               onChangeText={setTableNumber}
               keyboardType="decimal-pad"
             />
-            <Button title="Abrir mesa" onPress={handleOpenTable} loading={loading}/>
+            <Button
+              title="Abrir mesa"
+              onPress={handleOpenTable}
+              loading={loading}
+            />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

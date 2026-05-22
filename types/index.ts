@@ -34,14 +34,14 @@ export interface Product {
 }
 
 export interface Order {
-  id: string
-  table: number
-  name?: string | null
-  draft: boolean
-  status: boolean
-  createdAt: string
-  updatedAt: string
-  items?: Item[]
+  id: string;
+  table: number;
+  name?: string | null;
+  draft: boolean;
+  status: boolean;
+  createdAt: string;
+  updatedAt: string;
+  items?: Item[];
 }
 
 export interface Item {
@@ -67,4 +67,3 @@ export interface AddItemRequest {
 export interface SendOrderRequest {
   order_id: string;
 }
-
