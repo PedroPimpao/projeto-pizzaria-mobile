@@ -1,11 +1,12 @@
 import Loading from '@/components/Loading';
+import Select from '@/components/Select';
 import { borderRadius, colors, fontSize, spacing } from '@/constants/theme';
 import api from '@/services/api';
 import { Category } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const Order = () => {
@@ -17,6 +18,7 @@ const Order = () => {
   }>();
 
   const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [loadinCategories, setLoadingCategories] = useState(false);
 
   useEffect(() => {
@@ -49,11 +51,29 @@ const Order = () => {
       <View style={[styles.header, { paddingTop: insets.top + 24 }]}>
         <View style={styles.headerContent}>
           <Text style={styles.headerTitle}>Pagina Order - Mesa {table}</Text>
-          <Pressable style={styles.closeButton} onPress={() => {router.back()}}>
+          <Pressable
+            style={styles.closeButton}
+            onPress={() => {
+              router.back();
+            }}
+          >
             <Ionicons name="trash" size={24} color={colors.primary} />
           </Pressable>
         </View>
       </View>
+
+      <ScrollView style={styles.scrollContent}>
+        <Select
+          label="Categorias"
+          placeholder="Selecione a categoria..."
+          options={categories.map(cat => ({
+            label: cat.name,
+            value: cat.id,
+          }))}
+          selectedValue={selectedCategory}
+          onValueChange={setSelectedCategory}
+        />
+      </ScrollView>
     </View>
   );
 };
@@ -83,7 +103,10 @@ const styles = StyleSheet.create({
   closeButton: {
     backgroundColor: colors.red,
     padding: spacing.sm,
-    borderRadius: borderRadius.md
+    borderRadius: borderRadius.md,
+  },
+  scrollContent: {
+    padding: spacing.lg,
   },
 });
 export default Order;
