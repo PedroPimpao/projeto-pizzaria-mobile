@@ -1,4 +1,6 @@
+import Button from '@/components/Button';
 import Loading from '@/components/Loading';
+import { QuantityControl } from '@/components/QuantityControl';
 import Select from '@/components/Select';
 import { borderRadius, colors, fontSize, spacing } from '@/constants/theme';
 import api from '@/services/api';
@@ -6,7 +8,14 @@ import { Category, Product } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const Order = () => {
@@ -26,6 +35,7 @@ const Order = () => {
   const [loadingCategories, setLoadingCategories] = useState(false);
   const [loadingProducts, setLoadingProducts] = useState(false);
 
+  const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
     loadCategories();
@@ -65,15 +75,14 @@ const Order = () => {
         params: { category_id: categoryId },
       });
 
-      console.log(response.data)
+      console.log(response.data);
       setProducts(response.data);
     } catch (err) {
       console.log(err);
     } finally {
       setLoadingProducts(false);
     }
-  }
-
+  };
 
   if (loadingCategories) {
     return <Loading />;
@@ -122,6 +131,28 @@ const Order = () => {
             />
           )
         )}
+
+        {selectedProduct && (
+          <View style={styles.quantitySection}>
+            <Text style={styles.quantityLabel}>Quantidade</Text>
+            <QuantityControl
+              quantity={quantity}
+              onIncrement={() => setQuantity(quantity => quantity + 1)}
+              onDecrement={() => {
+                if (quantity <= 1) {
+                  setQuantity(1);
+                  return;
+                }
+
+                setQuantity(quantity => quantity - 1);
+              }}
+            />
+          </View>
+        )}
+
+        {selectedProduct && (
+          <Button title="Adicionar" onPress={() => {}} variant="secondary" />
+        )}
       </ScrollView>
     </View>
   );
@@ -156,7 +187,18 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: spacing.lg,
-    gap: 14
+    gap: 14,
+  },
+  quantitySection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: spacing.md,
+  },
+  quantityLabel: {
+    color: colors.primary,
+    fontSize: fontSize.lg,
+    fontWeight: 'bold',
   },
 });
 export default Order;
