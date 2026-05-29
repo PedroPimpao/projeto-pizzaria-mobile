@@ -2,11 +2,11 @@ import Loading from '@/components/Loading';
 import Select from '@/components/Select';
 import { borderRadius, colors, fontSize, spacing } from '@/constants/theme';
 import api from '@/services/api';
-import { Category } from '@/types';
+import { Category, Product } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const Order = () => {
@@ -19,7 +19,13 @@ const Order = () => {
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [loadinCategories, setLoadingCategories] = useState(false);
+
+  const [products, setProducts] = useState<Product[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState('');
+
+  const [loadingCategories, setLoadingCategories] = useState(false);
+  const [loadingProducts, setLoadingProducts] = useState(false);
+
 
   useEffect(() => {
     loadCategories();
@@ -28,6 +34,15 @@ const Order = () => {
     };
     loadDataCategories();
   }, []);
+
+  useEffect(() => {
+    if (selectedCategory) {
+      loadProducts(selectedCategory);
+    } else {
+      setProducts([]);
+      setSelectedCategory('');
+    }
+  }, [selectedCategory]);
 
   const loadCategories = async () => {
     try {
@@ -42,7 +57,25 @@ const Order = () => {
     }
   };
 
-  if (loadinCategories) {
+  const loadProducts = async (categoryId: string) => {
+    try {
+      setLoadingProducts(true);
+
+      const response = await api.get<Product[]>('/category/products', {
+        params: { category_id: categoryId },
+      });
+
+      console.log(response.data)
+      setProducts(response.data);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoadingProducts(false);
+    }
+  }
+
+
+  if (loadingCategories) {
     return <Loading />;
   }
 
@@ -73,6 +106,22 @@ const Order = () => {
           selectedValue={selectedCategory}
           onValueChange={setSelectedCategory}
         />
+
+        {loadingProducts ? (
+          <ActivityIndicator size="small" color={colors.brand} />
+        ) : (
+          selectedCategory && (
+            <Select
+              placeholder="Selecione um produto..."
+              options={products.map(product => ({
+                label: product.name,
+                value: product.id,
+              }))}
+              selectedValue={selectedProduct}
+              onValueChange={setSelectedProduct}
+            />
+          )
+        )}
       </ScrollView>
     </View>
   );
@@ -107,6 +156,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: spacing.lg,
+    gap: 14
   },
 });
 export default Order;

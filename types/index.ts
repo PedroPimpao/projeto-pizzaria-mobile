@@ -28,6 +28,8 @@ export interface Product {
   price: string;
   description: string;
   category_id: string;
+  banner: string;
+  disabled: boolean;
   createdAt: string;
   updatedAt: string;
   category?: Category;

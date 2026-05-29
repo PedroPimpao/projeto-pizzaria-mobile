@@ -98,6 +98,7 @@ const Select = ({
 const styles = StyleSheet.create({
   container: {
     width: '100%',
+    paddingBottom: spacing.sm,
   },
   label: {
     color: colors.primary,
