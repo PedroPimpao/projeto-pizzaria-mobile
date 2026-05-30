@@ -25,7 +25,7 @@ export interface Category {
 export interface Product {
   id: string;
   name: string;
-  price: string;
+  price: number;
   description: string;
   category_id: string;
   banner: string;
@@ -48,11 +48,12 @@ export interface Order {
 
 export interface Item {
   id: string;
-  amount: string;
+  amount: number;
   order_id: string;
   product_id: string;
   createdAt: string;
   updatedAt: string;
+  product: Product;
 }
 
 export interface CreateOrderRequest {

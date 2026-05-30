@@ -1,10 +1,11 @@
 import Button from '@/components/Button';
 import Loading from '@/components/Loading';
+import { OrderItem } from '@/components/OrderItem';
 import { QuantityControl } from '@/components/QuantityControl';
 import Select from '@/components/Select';
 import { borderRadius, colors, fontSize, spacing } from '@/constants/theme';
 import api from '@/services/api';
-import { Category, Product } from '@/types';
+import { Category, Item, Product } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -36,6 +37,10 @@ const Order = () => {
   const [loadingProducts, setLoadingProducts] = useState(false);
 
   const [quantity, setQuantity] = useState(1);
+
+  const [loadingAddItem, setLoadingAddItem] = useState(false);
+
+  const [items, setItems] = useState<Item[]>([]);
 
   useEffect(() => {
     loadCategories();
@@ -81,6 +86,29 @@ const Order = () => {
       console.log(err);
     } finally {
       setLoadingProducts(false);
+    }
+  };
+
+  const handleAddItem = async () => {
+    try {
+      setLoadingAddItem(true);
+
+      const response = await api.post<Item>('/order/add', {
+        order_id: order_id,
+        product_id: selectedProduct,
+        amount: quantity,
+      });
+
+      console.log(response.data);
+      setItems([...items, response.data]);
+
+      setSelectedCategory('');
+      setSelectedProduct('');
+      setQuantity(1);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoadingAddItem(false);
     }
   };
 
@@ -151,7 +179,20 @@ const Order = () => {
         )}
 
         {selectedProduct && (
-          <Button title="Adicionar" onPress={() => {}} variant="secondary" />
+          <Button
+            title="Adicionar"
+            onPress={handleAddItem}
+            variant="secondary"
+          />
+        )}
+
+        {items.length > 0 && (
+          <View style={styles.itemsSection}>
+            <Text style={styles.itemsTitle}>Itens adicionados</Text>
+            {items.map(item => (
+              <OrderItem item={item} key={item.id} onRemove={async () => {}} />
+            ))}
+          </View>
         )}
       </ScrollView>
     </View>
@@ -199,6 +240,15 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontSize: fontSize.lg,
     fontWeight: 'bold',
+  },
+  itemsSection: {
+    marginTop: spacing.xl,
+    gap: spacing.md,
+  },
+  itemsTitle: {
+    color: colors.primary,
+    fontWeight: 'bold',
+    fontSize: fontSize.lg,
   },
 });
 export default Order;
