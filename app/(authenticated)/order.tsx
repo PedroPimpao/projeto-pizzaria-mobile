@@ -129,6 +129,17 @@ const Order = () => {
     }
   };
 
+  const handleAdvance = () => {
+    if (items.length === 0) {
+      return;
+    }
+
+    router.push({
+      pathname: '/(authenticated)/finish',
+      params: { order_id: order_id, table: table },
+    });
+  };
+
   if (loadingCategories) {
     return <Loading />;
   }
@@ -149,7 +160,10 @@ const Order = () => {
         </View>
       </View>
 
-      <ScrollView style={styles.scrollContent}>
+      <ScrollView
+        style={styles.scrollContent}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
+      >
         <Select
           label="Categorias"
           placeholder="Selecione a categoria..."
@@ -215,6 +229,12 @@ const Order = () => {
             ))}
           </View>
         )}
+
+        {items.length > 0 && (
+          <View style={styles.footer}>
+            <Button title="Avançar" onPress={handleAdvance} />
+          </View>
+        )}
       </ScrollView>
     </View>
   );
@@ -270,6 +290,9 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontWeight: 'bold',
     fontSize: fontSize.lg,
+  },
+  footer: {
+    paddingTop: 24,
   },
 });
 export default Order;
