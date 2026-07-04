@@ -2,7 +2,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'ADMIN' | 'STAFF';
+  role: 'ADMIN' | 'STAFF' | 'EXTERNAL' | 'SUPER_ADMIN' | 'USER_ROOT'
   createdAt?: string;
   updatedAt?: string;
 }
@@ -11,7 +11,7 @@ export interface LoginResponse {
   id: string;
   name: string;
   email: string;
-  role: 'ADMIN' | 'STAFF';
+  role: 'ADMIN' | 'STAFF' | 'EXTERNAL' | 'SUPER_ADMIN' | 'USER_ROOT';
   token: string;
 }
 
