@@ -63,7 +63,7 @@ const Order = () => {
   const loadCategories = async () => {
     try {
       setLoadingCategories(true);
-      const response = await api.get<Category[]>('/category');
+      const response = await api.get<Category[]>('/categories');
       console.log(response.data);
       setCategories(response.data);
     } catch (error) {
